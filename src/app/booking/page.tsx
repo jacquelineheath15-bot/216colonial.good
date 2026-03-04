@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { BookingCalendar, BookingForm } from "@/components/booking";
+import { BookingCalendar, BookingForm, QuoteRequestForm } from "@/components/booking";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { type DateRange } from "react-day-picker";
 import {
   ArrowLeft,
@@ -14,10 +16,15 @@ import {
   MapPin,
   Award,
   Shield,
+  Tag,
 } from "lucide-react";
+
+type BookingMode = "book" | "quote";
 
 export default function BookingPage() {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
+  const [mode, setMode] = React.useState<BookingMode>("book");
+  const [promoCode, setPromoCode] = React.useState("");
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -52,11 +59,51 @@ export default function BookingPage() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
+            <div className="flex gap-2 p-1 bg-muted/50 rounded-lg w-fit">
+              <Button
+                variant={mode === "book" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setMode("book")}
+                className={mode === "book" ? "bg-black hover:bg-black/90" : ""}
+              >
+                Book Now
+              </Button>
+              <Button
+                variant={mode === "quote" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setMode("quote")}
+                className={mode === "quote" ? "bg-black hover:bg-black/90" : ""}
+              >
+                Request a Quote
+              </Button>
+            </div>
+
+            <div className="flex items-end gap-2">
+              <div className="flex-1 max-w-xs space-y-2">
+                <Label htmlFor="promo" className="flex items-center gap-1.5 text-sm">
+                  <Tag className="h-3.5 w-3.5" />
+                  Promotion code
+                </Label>
+                <Input
+                  id="promo"
+                  placeholder="Enter code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="lowercase"
+                />
+              </div>
+            </div>
+
             <BookingCalendar
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
+              promoCode={promoCode}
             />
-            <BookingForm dateRange={dateRange} />
+            {mode === "book" ? (
+              <BookingForm dateRange={dateRange} promoCode={promoCode} />
+            ) : (
+              <QuoteRequestForm dateRange={dateRange} />
+            )}
           </div>
 
           <div className="space-y-6">

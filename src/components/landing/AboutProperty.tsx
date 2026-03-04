@@ -24,6 +24,24 @@ export function AboutProperty() {
   return (
     <section id="property" className="py-20 sm:py-28 bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Property Gallery */}
+        <div className="mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              className="aspect-[4/3] rounded-lg bg-cover bg-center shadow-lg"
+              style={{
+                backgroundImage: `url('/images/house-exterior.png')`,
+              }}
+            />
+            <div
+              className="aspect-[4/3] rounded-lg bg-cover bg-center shadow-lg"
+              style={{
+                backgroundImage: `url('/images/pool-aerial.png')`,
+              }}
+            />
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <span className="text-sm font-semibold text-primary uppercase tracking-wider">
@@ -83,6 +101,16 @@ export function AboutProperty() {
                   Three ensuite bedrooms plus a flexible fourth bedroom that can 
                   serve as a den or yoga studio. Perfect for families or guests 
                   who appreciate privacy and comfort.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm bg-amber-50">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-2 text-amber-900">Short-Term Rental</h3>
+                <p className="text-amber-800 text-sm">
+                  This property is exclusively available for short-term vacation rentals 
+                  of 7 days or less. Perfect for a luxurious Palm Beach getaway.
                 </p>
               </CardContent>
             </Card>

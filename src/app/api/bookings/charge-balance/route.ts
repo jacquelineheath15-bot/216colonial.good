@@ -62,6 +62,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Payment system not configured' },
+        { status: 500 }
+      );
+    }
+
     const config = getConfig();
 
     const paymentIntent = await stripe.paymentIntents.create({

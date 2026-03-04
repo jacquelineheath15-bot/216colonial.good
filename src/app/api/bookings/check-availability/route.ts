@@ -31,16 +31,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        { error: 'Service configuration error' },
+        { status: 500 }
+      );
+    }
+
     const supabase = createServiceClient();
 
     const { data: conflictingBookings, error } = await supabase
       .from('bookings')
       .select('check_in, check_out')
       .eq('status', 'confirmed')
-      .or(`and(check_in.lt.${check_out},check_out.gt.${check_in})`);
+      .lt('check_in', check_out)
+      .gt('check_out', check_in);
 
     if (error) {
-      console.error('Supabase error:', error);
+      console.error('Supabase error:', error.message, error.details);
       return NextResponse.json(
         { error: 'Failed to check availability' },
         { status: 500 }

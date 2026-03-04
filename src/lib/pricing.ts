@@ -1,5 +1,7 @@
 import { differenceInDays, parseISO } from 'date-fns';
 
+import { PROMO_CODES } from './promo-codes';
+
 export function getConfig() {
   return {
     nightlyRate: Number(process.env.NIGHTLY_RATE) || 450,
@@ -23,18 +25,33 @@ export interface PricingBreakdown {
   balanceOwed: number;
 }
 
-export function calculatePricing(checkIn: string, checkOut: string): PricingBreakdown {
+export function getNightlyRate(promotionCode?: string | null): number {
   const config = getConfig();
-  
+  if (promotionCode?.trim()) {
+    const code = promotionCode.trim().toLowerCase();
+    const promoRate = PROMO_CODES[code];
+    if (promoRate != null) return promoRate;
+  }
+  return config.nightlyRate;
+}
+
+export function calculatePricing(
+  checkIn: string,
+  checkOut: string,
+  promotionCode?: string | null
+): PricingBreakdown {
+  const config = getConfig();
+  const nightlyRate = getNightlyRate(promotionCode);
+
   const checkInDate = parseISO(checkIn);
   const checkOutDate = parseISO(checkOut);
   const nights = differenceInDays(checkOutDate, checkInDate);
-  
+
   if (nights <= 0) {
     throw new Error('Check-out date must be after check-in date');
   }
-  
-  const subtotal = nights * config.nightlyRate;
+
+  const subtotal = nights * nightlyRate;
   const cleaningFee = config.cleaningFee;
   const serviceFee = Math.round(subtotal * config.serviceFeePercentage);
   const totalPrice = subtotal + cleaningFee + serviceFee;
@@ -43,7 +60,7 @@ export function calculatePricing(checkIn: string, checkOut: string): PricingBrea
   
   return {
     nights,
-    nightlyRate: config.nightlyRate,
+    nightlyRate,
     subtotal,
     cleaningFee,
     serviceFee,

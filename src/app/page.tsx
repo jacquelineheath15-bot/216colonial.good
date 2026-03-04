@@ -3,6 +3,7 @@ import {
   Hero,
   AboutProperty,
   Services,
+  GuestServices,
   AboutPalmBeach,
   Footer,
 } from "@/components/landing";
@@ -15,6 +16,7 @@ export default function Home() {
         <Hero />
         <AboutProperty />
         <Services />
+        <GuestServices />
         <AboutPalmBeach />
       </main>
       <Footer />

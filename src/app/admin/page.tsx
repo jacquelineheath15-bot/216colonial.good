@@ -18,9 +18,20 @@ export default async function AdminPage() {
     .select("*")
     .order("check_in", { ascending: true });
 
+  const { data: quoteRequests = [] } = await supabase
+    .from("quote_requests")
+    .select("*")
+    .order("created_at", { ascending: false });
+
   if (error) {
     console.error("Failed to fetch bookings:", error);
   }
 
-  return <AdminDashboard bookings={bookings || []} userEmail={user.email} />;
+  return (
+    <AdminDashboard
+      bookings={bookings || []}
+      quoteRequests={quoteRequests || []}
+      userEmail={user.email}
+    />
+  );
 }

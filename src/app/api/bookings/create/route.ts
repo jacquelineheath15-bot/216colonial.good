@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       guest_address,
       num_guests,
       special_requests,
+      promotion_code,
     } = body;
 
     if (
@@ -61,19 +62,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing Supabase environment variables');
+      return NextResponse.json(
+        { error: 'Service configuration error. Please try again later.' },
+        { status: 500 }
+      );
+    }
+
     const supabase = createServiceClient();
 
+    // Find overlapping confirmed bookings: booking overlaps if
+    // booking.check_in < requested_check_out AND booking.check_out > requested_check_in
     const { data: conflictingBookings, error: conflictError } = await supabase
       .from('bookings')
       .select('id')
       .eq('status', 'confirmed')
-      .or(`and(check_in.lt.${check_out},check_out.gt.${check_in})`)
+      .lt('check_in', check_out)
+      .gt('check_out', check_in)
       .limit(1);
 
     if (conflictError) {
-      console.error('Conflict check error:', conflictError);
+      console.error('Conflict check error:', conflictError.message, conflictError.details);
+      const showDetails = process.env.NODE_ENV === 'development' || process.env.VERCEL_DEBUG_ERRORS === 'true';
       return NextResponse.json(
-        { error: 'Failed to check availability' },
+        {
+          error: 'Failed to check availability',
+          ...(showDetails && { details: conflictError.message, code: conflictError.code }),
+        },
         { status: 500 }
       );
     }
@@ -85,7 +101,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const pricing = calculatePricing(check_in, check_out);
+    const pricing = calculatePricing(check_in, check_out, promotion_code);
     const config = getConfig();
 
     const { data: booking, error: insertError } = await supabase
@@ -119,18 +135,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(pricing.depositAmount * 100),
-      currency: 'usd',
-      metadata: {
-        booking_id: booking.id,
-        payment_type: 'deposit',
-        guest_email,
-        property_name: config.propertyName,
-      },
-      receipt_email: guest_email,
-      description: `Deposit for ${config.propertyName} - ${check_in} to ${check_out}`,
-    });
+    if (!stripe) {
+      console.error('STRIPE_SECRET_KEY is not set');
+      return NextResponse.json(
+        { error: 'Payment system not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
+    let paymentIntent;
+    try {
+      paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(pricing.depositAmount * 100),
+        currency: 'usd',
+        metadata: {
+          booking_id: booking.id,
+          payment_type: 'deposit',
+          guest_email,
+          property_name: config.propertyName,
+        },
+        receipt_email: guest_email,
+        description: `Deposit for ${config.propertyName} - ${check_in} to ${check_out}`,
+      });
+    } catch (stripeError) {
+      const msg = stripeError instanceof Error ? stripeError.message : String(stripeError);
+      console.error('Stripe error:', msg);
+      const showDetails = process.env.VERCEL_DEBUG_ERRORS === 'true';
+      return NextResponse.json(
+        {
+          error: 'Payment processing failed',
+          ...(showDetails && { details: msg }),
+        },
+        { status: 500 }
+      );
+    }
 
     const { error: updateError } = await supabase
       .from('bookings')
@@ -150,9 +188,14 @@ export async function POST(request: NextRequest) {
       total_price: pricing.totalPrice,
     });
   } catch (error) {
-    console.error('Create booking error:', error);
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('Create booking error:', err.message, err.stack);
+    const showDetails = process.env.VERCEL_DEBUG_ERRORS === 'true';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        ...(showDetails && { details: err.message }),
+      },
       { status: 500 }
     );
   }

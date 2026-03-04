@@ -7,9 +7,9 @@ import { useState } from "react";
 
 const navLinks = [
   { href: "#property", label: "Property" },
-  { href: "#services", label: "Services" },
-  { href: "#palm-beach", label: "Palm Beach" },
-  { href: "/booking", label: "Book Now" },
+  { href: "#services", label: "Amenities" },
+  { href: "#guest-services", label: "Guest Services" },
+  { href: "#palm-beach", label: "About Palm Beach" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -21,8 +21,8 @@ export function Navbar() {
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex-shrink-0">
-            <Link href="/" className="text-xl font-semibold tracking-tight">
-              216 Colonial Ln
+            <Link href="/" className="text-2xl font-light tracking-[0.2em] uppercase">
+              216 Colonial
             </Link>
           </div>
 
@@ -39,10 +39,7 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:flex md:items-center md:gap-4">
-            <Button variant="outline" size="sm">
-              Virtual Tour
-            </Button>
-            <Button size="sm" asChild>
+            <Button size="sm" className="bg-black hover:bg-black/90" asChild>
               <Link href="/booking">Book Now</Link>
             </Button>
           </div>
@@ -77,10 +74,7 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="outline" size="sm">
-                  Virtual Tour
-                </Button>
-                <Button size="sm" asChild>
+                <Button size="sm" className="bg-black hover:bg-black/90" asChild>
                   <Link href="/booking">Book Now</Link>
                 </Button>
               </div>

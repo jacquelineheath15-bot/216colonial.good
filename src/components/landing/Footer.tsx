@@ -8,7 +8,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="text-xl font-semibold">216 Colonial Ln</h3>
+            <h3 className="text-2xl font-light tracking-[0.2em] uppercase">216 Colonial</h3>
             <p className="mt-4 text-sm text-background/70 leading-relaxed">
               Your luxury vacation rental in the heart of Palm Beach, Florida.
               Experience the perfect blend of comfort and elegance.
@@ -31,11 +31,6 @@ export function Footer() {
               <li>
                 <Link href="#palm-beach" className="hover:text-background transition-colors">
                   Palm Beach
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-background transition-colors">
-                  Virtual Tour
                 </Link>
               </li>
             </ul>
@@ -76,11 +71,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 flex-shrink-0" />
-                <span>(561) 555-0123</span>
+                <span>(929) 765-9504</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-4 w-4 flex-shrink-0" />
-                <span>info@216coloniallane.com</span>
+                <span>jackie@inglewoodridge.com</span>
               </li>
             </ul>
           </div>

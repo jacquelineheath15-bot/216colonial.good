@@ -3,6 +3,13 @@ import { createServiceClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        { error: 'Service configuration error', blocked: [] },
+        { status: 500 }
+      );
+    }
+
     const supabase = createServiceClient();
 
     const { data: confirmedBookings, error } = await supabase

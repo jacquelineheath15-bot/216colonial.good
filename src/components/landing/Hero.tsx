@@ -54,15 +54,8 @@ export function Hero() {
           </div>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="text-base" asChild>
-              <Link href="/booking">Check Availability</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-base bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
-            >
-              Take a Virtual Tour
+            <Button size="lg" className="text-base bg-black hover:bg-black/90" asChild>
+              <Link href="/booking">Book Now</Link>
             </Button>
           </div>
         </div>

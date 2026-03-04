@@ -23,13 +23,15 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { getStripe } from "@/lib/stripe-client";
+import { getNightlyRateWithPromo } from "@/lib/promo-codes";
 import type { CreateBookingResponse } from "@/types/booking";
 
 interface BookingFormProps {
   dateRange: DateRange | undefined;
+  promoCode?: string;
 }
 
-const NIGHTLY_RATE = Number(process.env.NEXT_PUBLIC_NIGHTLY_RATE) || 450;
+const BASE_NIGHTLY_RATE = Number(process.env.NEXT_PUBLIC_NIGHTLY_RATE) || 450;
 const CLEANING_FEE = Number(process.env.NEXT_PUBLIC_CLEANING_FEE) || 150;
 const SERVICE_FEE_PERCENTAGE =
   Number(process.env.NEXT_PUBLIC_SERVICE_FEE_PERCENTAGE) || 0.12;
@@ -125,7 +127,7 @@ function PaymentForm({
   );
 }
 
-export function BookingForm({ dateRange }: BookingFormProps) {
+export function BookingForm({ dateRange, promoCode = "" }: BookingFormProps) {
   const [formData, setFormData] = React.useState<FormData>({
     firstName: "",
     lastName: "",
@@ -148,7 +150,8 @@ export function BookingForm({ dateRange }: BookingFormProps) {
     ? differenceInDays(dateRange.to!, dateRange.from!)
     : 0;
 
-  const subtotal = numberOfNights * NIGHTLY_RATE;
+  const nightlyRate = getNightlyRateWithPromo(BASE_NIGHTLY_RATE, promoCode);
+  const subtotal = numberOfNights * nightlyRate;
   const cleaningFee = CLEANING_FEE;
   const serviceFee = Math.round(subtotal * SERVICE_FEE_PERCENTAGE);
   const calculatedTotal = subtotal + cleaningFee + serviceFee;
@@ -169,6 +172,7 @@ export function BookingForm({ dateRange }: BookingFormProps) {
         body: JSON.stringify({
           check_in: format(dateRange.from!, "yyyy-MM-dd"),
           check_out: format(dateRange.to!, "yyyy-MM-dd"),
+          promotion_code: promoCode.trim() || undefined,
           guest_first_name: formData.firstName,
           guest_last_name: formData.lastName,
           guest_email: formData.email,
@@ -179,11 +183,12 @@ export function BookingForm({ dateRange }: BookingFormProps) {
         }),
       });
 
-      const data: CreateBookingResponse & { error?: string } =
+      const data: CreateBookingResponse & { error?: string; details?: string; code?: string } =
         await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create booking");
+        const msg = data.details ? `${data.error}: ${data.details}` : (data.error || "Failed to create booking");
+        throw new Error(msg);
       }
 
       setClientSecret(data.client_secret);
@@ -453,7 +458,7 @@ export function BookingForm({ dateRange }: BookingFormProps) {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-blue-800">
                   <span>
-                    ${NIGHTLY_RATE} × {numberOfNights} nights
+                    ${nightlyRate} × {numberOfNights} nights
                   </span>
                   <span>${subtotal}</span>
                 </div>

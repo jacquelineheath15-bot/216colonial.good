@@ -34,6 +34,7 @@ export interface CreateBookingInput {
   guest_address?: string;
   num_guests: number;
   special_requests?: string;
+  promotion_code?: string;
 }
 
 export interface BookingWithPricing extends CreateBookingInput {

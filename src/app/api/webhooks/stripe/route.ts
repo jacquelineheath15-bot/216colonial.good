@@ -15,6 +15,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!stripe) {
+    console.error('STRIPE_SECRET_KEY is not configured');
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+  }
+
   let event: Stripe.Event;
 
   try {

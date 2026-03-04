@@ -14,18 +14,36 @@ import {
   Clock,
   Loader2,
   AlertCircle,
+  MessageSquare,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { createClient } from "@/lib/supabase/client";
 import type { Booking } from "@/types/booking";
 
+interface QuoteRequest {
+  id: string;
+  created_at: string;
+  guest_first_name: string;
+  guest_last_name: string;
+  guest_email: string;
+  guest_phone: string;
+  check_in: string | null;
+  check_out: string | null;
+  proposed_nightly_rate: number | null;
+  proposed_total: number | null;
+  num_guests: number | null;
+  message: string | null;
+}
+
 interface AdminDashboardProps {
   bookings: Booking[];
+  quoteRequests: QuoteRequest[];
   userEmail?: string;
 }
 
 export function AdminDashboard({
   bookings: initialBookings,
+  quoteRequests = [],
   userEmail,
 }: AdminDashboardProps) {
   const router = useRouter();
@@ -204,6 +222,75 @@ export function AdminDashboard({
             </CardContent>
           </Card>
         </div>
+
+        {quoteRequests.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Quote Requests
+              </CardTitle>
+              <p className="text-sm text-gray-500">
+                Custom pricing inquiries from the Request a Quote form
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-medium text-gray-500">Guest</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-500">Contact</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-500">Dates</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-500">Proposed Rate</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-500">Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {quoteRequests.map((qr) => (
+                      <tr key={qr.id} className="border-b hover:bg-gray-50">
+                        <td className="py-4 px-4">
+                          <div className="font-medium">
+                            {qr.guest_first_name} {qr.guest_last_name}
+                          </div>
+                          {qr.num_guests && (
+                            <div className="text-sm text-gray-500">{qr.num_guests} guests</div>
+                          )}
+                        </td>
+                        <td className="py-4 px-4">
+                          <a
+                            href={`mailto:${qr.guest_email}`}
+                            className="text-blue-600 hover:underline text-sm"
+                          >
+                            {qr.guest_email}
+                          </a>
+                          <div className="text-sm text-gray-500">
+                            <a href={`tel:${qr.guest_phone}`}>{qr.guest_phone}</a>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-sm">
+                          {qr.check_in && qr.check_out
+                            ? `${format(parseISO(qr.check_in), "MMM d")} - ${format(parseISO(qr.check_out), "MMM d, yyyy")}`
+                            : "—"}
+                        </td>
+                        <td className="py-4 px-4 text-sm">
+                          {qr.proposed_nightly_rate != null
+                            ? `$${qr.proposed_nightly_rate}/night`
+                            : qr.proposed_total != null
+                              ? `$${qr.proposed_total} total`
+                              : "—"}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-600 max-w-xs truncate">
+                          {qr.message || "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

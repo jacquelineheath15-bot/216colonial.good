@@ -39,20 +39,20 @@ export function AboutPalmBeach() {
               <div
                 className="aspect-[4/5] rounded-lg bg-cover bg-center"
                 style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=500&auto=format&fit=crop')`,
+                  backgroundImage: `url('/images/resident_2024-07_f312267b-dbbf-4076-aa2f-4d7987b5b360_worth avenue.avif')`,
                 }}
               />
               <div className="space-y-4">
                 <div
                   className="aspect-square rounded-lg bg-cover bg-center"
                   style={{
-                    backgroundImage: `url('https://images.unsplash.com/photo-1548659839-09d3d0f5c10e?q=80&w=500&auto=format&fit=crop')`,
+                    backgroundImage: `url('/images/breakers.jpg')`,
                   }}
                 />
                 <div
                   className="aspect-square rounded-lg bg-cover bg-center"
                   style={{
-                    backgroundImage: `url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=500&auto=format&fit=crop')`,
+                    backgroundImage: `url('/images/beach-patio.png')`,
                   }}
                 />
               </div>

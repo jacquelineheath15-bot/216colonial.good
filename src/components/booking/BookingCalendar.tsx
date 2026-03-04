@@ -12,10 +12,12 @@ import {
   eachDayOfInterval,
   isWithinInterval,
 } from "date-fns";
+import { getNightlyRateWithPromo, isValidPromoCode } from "@/lib/promo-codes";
 
 interface BookingCalendarProps {
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
+  promoCode?: string;
 }
 
 interface BlockedDateRange {
@@ -23,7 +25,7 @@ interface BlockedDateRange {
   check_out: string;
 }
 
-const NIGHTLY_RATE = Number(process.env.NEXT_PUBLIC_NIGHTLY_RATE) || 450;
+const BASE_NIGHTLY_RATE = Number(process.env.NEXT_PUBLIC_NIGHTLY_RATE) || 450;
 const CLEANING_FEE = Number(process.env.NEXT_PUBLIC_CLEANING_FEE) || 150;
 const SERVICE_FEE_PERCENTAGE =
   Number(process.env.NEXT_PUBLIC_SERVICE_FEE_PERCENTAGE) || 0.12;
@@ -33,9 +35,12 @@ const DEPOSIT_PERCENTAGE =
 export function BookingCalendar({
   dateRange,
   onDateRangeChange,
+  promoCode = "",
 }: BookingCalendarProps) {
   const [blockedDates, setBlockedDates] = React.useState<Date[]>([]);
   const [loading, setLoading] = React.useState(true);
+
+  const nightlyRate = getNightlyRateWithPromo(BASE_NIGHTLY_RATE, promoCode);
 
   React.useEffect(() => {
     async function fetchBlockedDates() {
@@ -69,7 +74,7 @@ export function BookingCalendar({
       ? differenceInDays(dateRange.to, dateRange.from)
       : 0;
 
-  const subtotal = numberOfNights * NIGHTLY_RATE;
+  const subtotal = numberOfNights * nightlyRate;
   const cleaningFee = CLEANING_FEE;
   const serviceFee = Math.round(subtotal * SERVICE_FEE_PERCENTAGE);
   const total = subtotal + cleaningFee + serviceFee;
@@ -91,9 +96,12 @@ export function BookingCalendar({
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Select Your Dates</CardTitle>
           <Badge variant="secondary" className="text-lg font-semibold">
-            ${NIGHTLY_RATE}
+            ${nightlyRate}
             <span className="text-sm font-normal text-muted-foreground ml-1">
               /night
+              {isValidPromoCode(promoCode) && (
+                <span className="ml-1 text-green-600">(promo applied)</span>
+              )}
             </span>
           </Badge>
         </div>
@@ -136,7 +144,7 @@ export function BookingCalendar({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
-                    ${NIGHTLY_RATE} x {numberOfNights} nights
+                    ${nightlyRate} x {numberOfNights} nights
                   </span>
                   <span className="font-medium">${subtotal}</span>
                 </div>
